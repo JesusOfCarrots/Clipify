@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Clipper</title>
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <h1>YouTube Clipper</h1>
+    <form id="clip-form">
+        <label for="video_url">YouTube Video URL:</label>
+        <input type="text" id="video_url" name="video_url" required><br>
+        <label for="start_time">Start Time (HH:MM:SS):</label>
+        <input type="text" id="start_time" name="start_time" required pattern="^([0-9]{1,2}):([0-9]{2}):([0-9]{2})$"><br>
+        <label for="end_time">End Time (HH:MM:SS):</label>
+        <input type="text" id="end_time" name="end_time" required pattern="^([0-9]{1,2}):([0-9]{2}):([0-9]{2})$"><br>
+        <button type="submit">Create Clip</button>
+    </form>
+    <div id="clip-result">
+        <h2>Clip URL:</h2>
+        <a id="clip-url" href="#" target="_blank"></a>
+    </div>
+    <script>
+        function timeStringToSeconds(timeString) {
+            const [hours, minutes, seconds] = timeString.split(':').map(Number);
+            return (hours * 3600) + (minutes * 60) + seconds;
+        }
+
+        function extractVideoID(url) {
+            const urlObj = new URL(url);
+            if (urlObj.hostname.includes('youtube.com')) {
+                return urlObj.searchParams.get('v');
+            } else if (urlObj.hostname.includes('youtu.be')) {
+                return urlObj.pathname.slice(1);
+            }
+            return null;
+        }
+
+        document.getElementById('clip-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const video_url = document.getElementById('video_url').value;
+            const start_time_str = document.getElementById('start_time').value;
+            const end_time_str = document.getElementById('end_time').value;
+
+            const video_id = extractVideoID(video_url);
+            if (!video_id) {
+                alert('Invalid YouTube URL');
+                return;
+            }
+
+            const startTime = timeStringToSeconds(start_time_str);
+            const endTime = timeStringToSeconds(end_time_str);
+
+            const clip_url = `https://www.youtube.com/embed/${video_id}?start=${startTime}&end=${endTime}`;
+            const clip_link = document.getElementById('clip-url');
+            clip_link.href = clip_url;
+            clip_link.textContent = clip_url;
+        });
+    </script>
+</body>
+</html>
